@@ -20,7 +20,7 @@ int main()
 	int num = 0;
 	cout << "Введите число: ";
 	cin >> num;
-	cout << ((num > 21) ? ((num - 21) * 2) : ('\0')) << endl;
+	cout << ((num > 21) ? (num - 21) * 2 : 21 - num) << endl;
 
 	// Задание 3
 	e = aE * (bE + (static_cast<float>(cE) / dE));
