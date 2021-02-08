@@ -48,7 +48,7 @@ void exercise_3()
 {
 	const int a = 11, b = 7;
 	cout << "********** Задание 3 **********" << endl;
-	if (a == 10 || b == 10 || a + b == 10)
+	if ((a == 10 && b == 10) || a + b == 10)
 		cout << true << endl;
 	else
 		cout << false << endl;
@@ -58,7 +58,6 @@ void exercise_4()
 {
 	unsigned short year = 0;
 	cout << "********** Задание 4 **********" << endl;
-	while (true)
 	cout << "Введите год: ";
 	cin >> year;
 	cout << (isLeapYear(year) ? "Год является високосным" : "Год не високосный") << endl;
