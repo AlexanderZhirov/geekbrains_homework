@@ -23,7 +23,7 @@ void ra::parse_args(int argc, char *argv[], key **keys)
 				ra::get_full_parameters(argc, argv, keys[input]);
 				break;
 			case 'o':
-				keys[output]->parameters[0] = optarg;
+				keys[output]->arguments[0] = optarg;
 				keys[output]->isset = true;
 				keys[output]->count = 1;
 				break;
@@ -46,12 +46,13 @@ void ra::get_full_parameters(int argc, char *argv[], key *curKey)
 	else
 		curKey->isset = true;
 
-	curKey->parameters[i++] = optarg;
+	curKey->arguments[i++] = optarg;
+
 	if (optind < argc)
 	{
 		while (optind < argc && *argv[optind] != '-')
 		{
-			curKey->parameters[i++] = argv[optind++];
+			curKey->arguments[i++] = argv[optind++];
 		}
 	}
 

@@ -10,10 +10,10 @@ namespace ra // read arguments
 
 	typedef struct
 	{
-		bool required = false;
-		bool isset = false;
-		int count = 0;
-		char *parameters[10] = {nullptr};
+		bool required = false;				// Ключ является обязательным для установки
+		bool isset = false;					// Был установлен при запуске программы
+		int count = 0;						// Количество аргументов переданных для текущего ключа
+		char *arguments[10] = {nullptr};	// Переданные аргументы (до 10 аругментов на один ключ)
 	} key;
 
 	const char* const short_options = "hi:o:";
