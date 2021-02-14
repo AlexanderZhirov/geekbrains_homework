@@ -39,8 +39,13 @@ void ra::parse_args(int argc, char *argv[], key **keys)
 
 void ra::get_full_parameters(int argc, char *argv[], key *curKey)
 {
-	curKey->isset = true;
 	int i = 0;
+
+	if (curKey->isset)
+		i = curKey->count;
+	else
+		curKey->isset = true;
+
 	curKey->parameters[i++] = optarg;
 	if (optind < argc)
 	{
@@ -49,6 +54,7 @@ void ra::get_full_parameters(int argc, char *argv[], key *curKey)
 			curKey->parameters[i++] = argv[optind++];
 		}
 	}
+
 	curKey->count = i;
 }
 
