@@ -80,8 +80,6 @@ int main(int argc, char **argv)
 
 			for (int i = 0; i < ki.count; ++i)
 				ofile << texts[i];
-
-			ofile << '\n';
 		}
 
 		free_texts(texts, ki.count);
