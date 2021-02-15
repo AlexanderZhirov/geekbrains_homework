@@ -1,6 +1,5 @@
 #include "realization.hpp"
 #include <random>
-#include <fstream>
 #include <cstdlib>
 
 char **generate_texts(int size, int count)
