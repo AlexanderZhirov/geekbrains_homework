@@ -29,7 +29,7 @@ void ra::parse_args(int argc, char *argv[], key **keys)
 				ra::print_usage_and_exit(0);
 				break;
 			case '?':
-				ra::print_usage_and_exit(-1);
+				ra::print_usage_and_exit(1);
 				break;
 		}
 	} while (next_option != -1);
@@ -37,6 +37,9 @@ void ra::parse_args(int argc, char *argv[], key **keys)
 
 void ra::get_argument(key *curKey)
 {
+	if (curKey->isset)
+		ra::print_usage_and_exit(3);
+
 	curKey->arguments[0] = optarg;
 	curKey->isset = true;
 	curKey->count = 1;
@@ -69,6 +72,6 @@ void ra::check_keys(key **keys, int size)
 	for (int i = 0; i < size; ++i)
 	{
 		if (keys[i]->required && !keys[i]->isset)
-			ra::print_usage_and_exit(-2);
+			ra::print_usage_and_exit(2);
 	}
 }
