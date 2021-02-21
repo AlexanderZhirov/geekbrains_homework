@@ -1,6 +1,8 @@
 #include "map.hpp"
 #include <cstdlib>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_native_dialog.h>
+#include "ai.hpp"
 
 map *init_map(const int size, const int window_wh, const int margin_map)
 {
@@ -16,6 +18,7 @@ map *init_map(const int size, const int window_wh, const int margin_map)
 	m->size = size;
 	m->window_wh = window_wh;
 	m->margin_map = margin_map;
+	m->toWin = size;
 
 	line_count = size - 1;
 	map_wh = window_wh - margin_map * 2;
@@ -44,7 +47,7 @@ map *init_map(const int size, const int window_wh, const int margin_map)
 	{
 		m->grid[i] = (line **)malloc(sizeof(line *) * line_count);
 
-		direction d = (i == 0 ? horizontal : vertical);
+		DIRECTION d = (i == 0 ? HORIZONTAL : VERTICAL);
 
 		for (int j = 0; j < line_count; ++j)
 		{
@@ -65,16 +68,17 @@ cell *create_cell(const float row, const float col, const float cell_width, cons
 	c->width = cell_width;
 	c->sym_pos_x = c->pos_x + line_width + cell_margin;
 	c->sym_pos_y = c->pos_y + line_width + cell_margin;
+	c->p = EMPTY;
 	return c;
 }
 
-line *create_line(direction d, const float row, const float line_width, const float map_wh, const float cell_width, const float margin_map)
+line *create_line(DIRECTION d, const float row, const float line_width, const float map_wh, const float cell_width, const float margin_map)
 {
 	line *l = (line *)malloc(sizeof(line));
 	l->d = d;
 	l->height = map_wh;
 	l->width = line_width;
-	if (d == horizontal)
+	if (d == HORIZONTAL)
 	{
 		l->pos_x = margin_map;
 		l->pos_y = (row + 1) * cell_width + margin_map - line_width;
@@ -88,11 +92,11 @@ line *create_line(direction d, const float row, const float line_width, const fl
 	return l;
 }
 
-void draw_map(const map *m, ALLEGRO_BITMAP *b)
+void draw_map(const map *m, ALLEGRO_BITMAP *bx, ALLEGRO_BITMAP *bo)
 {
 	int size = m->size;
 
-	int swh = al_get_bitmap_width(b);
+	int swh = al_get_bitmap_width(bx);
 
 	for (int i = 0; i < size; ++i)
 	{
@@ -101,7 +105,12 @@ void draw_map(const map *m, ALLEGRO_BITMAP *b)
 			cell *c = m->cells[i][j];
 
 			if (c->is_draw)
-				al_draw_scaled_bitmap(b, 0, 0, swh, swh, c->sym_pos_x, c->sym_pos_y, m->sym_width, m->sym_width, 0);
+			{
+				if (c->p == HUMAN)
+					al_draw_scaled_bitmap(bx, 0, 0, swh, swh, c->sym_pos_x, c->sym_pos_y, m->sym_width, m->sym_width, 0);
+				else
+					al_draw_scaled_bitmap(bo, 0, 0, swh, swh, c->sym_pos_x, c->sym_pos_y, m->sym_width, m->sym_width, 0);
+			}
 //				al_draw_filled_rectangle(c->pos_x, c->pos_y, c->pos_x + c->width, c->pos_y + c->width, al_map_rgb(255, 0, 255));
 //				al_draw_text(f, al_map_rgba_f(100, 100, 255, 0.9), 0 - c->sym_width / 2, 0 - c->sym_width / 2, 0, "x");
 //				al_draw_text(f, al_map_rgba_f(100, 100, 255, 0.9), (c->sym_pos_x + c->sym_width / 2) - (c->sym_width / 4), (c->sym_pos_y + c->sym_width / 2) - (c->sym_width / 4), 0, "X");
@@ -110,9 +119,9 @@ void draw_map(const map *m, ALLEGRO_BITMAP *b)
 			if (c->select)
 			{
 				if (c->is_draw)
-					al_draw_tinted_scaled_bitmap(b, al_map_rgba_f(255, 0, 0, 0.3), 0, 0, swh, swh, c->sym_pos_x, c->sym_pos_y, m->sym_width, m->sym_width, 0);
+					al_draw_tinted_scaled_bitmap(bx, al_map_rgba_f(255, 0, 0, 0.3), 0, 0, swh, swh, c->sym_pos_x, c->sym_pos_y, m->sym_width, m->sym_width, 0);
 				else
-					al_draw_tinted_scaled_bitmap(b, al_map_rgba_f(0, 255, 0, 0.3), 0, 0, swh, swh, c->sym_pos_x, c->sym_pos_y, m->sym_width, m->sym_width, 0);
+					al_draw_tinted_scaled_bitmap(bx, al_map_rgba_f(0, 255, 0, 0.3), 0, 0, swh, swh, c->sym_pos_x, c->sym_pos_y, m->sym_width, m->sym_width, 0);
 			}
 
 
@@ -126,10 +135,10 @@ void draw_map(const map *m, ALLEGRO_BITMAP *b)
 		{
 			line *l = m->grid[i][j];
 
-			if (l->d == horizontal)
-				al_draw_filled_rectangle(l->pos_x, l->pos_y, l->pos_x + l->height, l->pos_y + l->width, al_map_rgb(255, 255, 255));
+			if (l->d == HORIZONTAL)
+				al_draw_filled_rectangle(l->pos_x, l->pos_y, l->pos_x + l->height, l->pos_y + l->width, al_map_rgb(0, 0, 0));
 			else
-				al_draw_filled_rectangle(l->pos_x, l->pos_y, l->pos_x + l->width, l->pos_y + l->height, al_map_rgb(255, 255, 255));
+				al_draw_filled_rectangle(l->pos_x, l->pos_y, l->pos_x + l->width, l->pos_y + l->height, al_map_rgb(0, 0, 0));
 		}
 	}
 }
@@ -145,7 +154,7 @@ void select_cell(map *m, const int mouse_x, const int mouse_y)
 			cell *c = m->cells[i][j];
 
 			if ((mouse_x >= c->pos_x && mouse_y >= c->pos_y) &&
-					(mouse_x <= (c->pos_x + c->width) && mouse_y <= (c->pos_y + c->width)))
+					(mouse_x <= (c->pos_x + c->width) && mouse_y <= (c->pos_y + c->width)) && c->p != HUMAN)
 				c->select = true;
 			else
 				c->select = false;
@@ -153,7 +162,7 @@ void select_cell(map *m, const int mouse_x, const int mouse_y)
 	}
 }
 
-void enter_cell(map *m, const int mouse_x, const int mouse_y)
+bool enter_cell(map *m, const int mouse_x, const int mouse_y, PLAYER p)
 {
 	int size = m->size;
 
@@ -165,7 +174,60 @@ void enter_cell(map *m, const int mouse_x, const int mouse_y)
 
 			if (!c->is_draw && (mouse_x >= c->pos_x && mouse_y >= c->pos_y) &&
 					(mouse_x <= (c->pos_x + c->width) && mouse_y <= (c->pos_y + c->width)))
+			{
 				c->is_draw = true;
+				c->p = p;
+				return true;
+			}
 		}
 	}
+
+	return false;
+}
+
+void clear_map(map *m)
+{
+	int size = m->size;
+
+	for (int i = 0; i < size; ++i)
+	{
+		for (int j = 0; j < size; ++j)
+		{
+			cell *c = m->cells[i][j];
+
+			c->is_draw = false;
+			c->select = false;
+			c->p = EMPTY;
+		}
+	}
+}
+
+bool game_check(map *m, PLAYER p)
+{
+	if (checkWin(m, p))
+	{
+		char human[] = "Вы победили!";
+		char ai[] = "Вы проиграли!";
+
+		int answer = al_show_native_message_box(NULL, "Игра окончена!", (p == AI ? ai : human),
+						"Начать игру сначала?", NULL, ALLEGRO_MESSAGEBOX_YES_NO);
+
+		if (answer == 1)
+			clear_map(m);
+		else
+			return true;
+	}
+
+	if (isDraw(m))
+	{
+		int answer = al_show_native_message_box(NULL, "Игра окончена!", "Ничья!",
+						"Начать игру сначала?", NULL, ALLEGRO_MESSAGEBOX_YES_NO);
+
+		if (answer == 1)
+			clear_map(m);
+		else
+			return true;
+	}
+
+	return false;
 }

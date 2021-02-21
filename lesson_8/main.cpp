@@ -2,23 +2,24 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_primitives.h>
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_image.h>
 
+#include "ai.hpp"
 #include "map.hpp"
 
 int main()
 {
-	int size = 3;
-	int window_wh = 600;
+	int size = 5;
+	int window_wh = 900;
 	int margin_map = 20;
 
 	map *m = init_map(size, window_wh, margin_map);
 
 	bool done = false;
 	bool redraw = true;
+	bool isdraw = true;
 	int FPS = 60;
+	bool move_ai = false;
 
 	int mouse_x = 0;
 	int mouse_y = 0;
@@ -28,7 +29,6 @@ int main()
 	ALLEGRO_TIMER *timer = NULL;
 	ALLEGRO_BITMAP *img_x = NULL;
 	ALLEGRO_BITMAP *img_o = NULL;
-	ALLEGRO_FONT *font = NULL;
 
 	if (!al_init())
 	{
@@ -48,11 +48,8 @@ int main()
 	al_init_primitives_addon();
 	al_install_keyboard();
 	al_install_mouse();
-	al_init_font_addon();
-	al_init_ttf_addon();
 	al_init_image_addon();
 
-	font = al_load_font("28_Days_Later.ttf", m->sym_width, 0);
 	img_x = al_load_bitmap("x.png");
 	img_o = al_load_bitmap("o.png");
 	timer = al_create_timer(1.0 / FPS);
@@ -100,7 +97,11 @@ int main()
 		}
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
 		{
-			enter_cell(m, mouse_x, mouse_y);
+			if (isdraw && enter_cell(m, mouse_x, mouse_y, HUMAN))
+			{
+				move_ai = true;
+				isdraw = false;
+			}
 		}
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_AXES)
 		{
@@ -109,6 +110,22 @@ int main()
 		}
 		else if (ev.type == ALLEGRO_EVENT_TIMER)
 		{
+			if (isdraw)
+			{
+				if (game_check(m, HUMAN) || game_check(m, AI))
+				{
+					done = true;
+					continue;
+				}
+
+				if (move_ai)
+				{
+					aiTurn(m);
+					move_ai = false;
+					isdraw = false;
+				}
+			}
+
 			select_cell(m, mouse_x, mouse_y);
 
 			redraw = true;
@@ -117,8 +134,9 @@ int main()
 		if (redraw && al_is_event_queue_empty(event_queue))
 		{
 			redraw = false;
+			isdraw = true;
 
-			draw_map(m, img_x);
+			draw_map(m, img_x, img_o);
 
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(255, 255, 255));
