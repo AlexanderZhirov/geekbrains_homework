@@ -9,8 +9,8 @@
 
 int main()
 {
-	int size = 5;
-	int window_wh = 900;
+	int size = 3;
+	int window_wh = 600;
 	int margin_map = 20;
 
 	map *m = init_map(size, window_wh, margin_map);
@@ -74,14 +74,7 @@ int main()
 		ALLEGRO_EVENT ev;
 		al_wait_for_event(event_queue, &ev);
 
-		if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
-		{
-			switch (ev.keyboard.keycode)
-			{
-
-			}
-		}
-		else if (ev.type == ALLEGRO_EVENT_KEY_UP)
+		if (ev.type == ALLEGRO_EVENT_KEY_UP)
 		{
 			switch (ev.keyboard.keycode)
 			{
@@ -112,7 +105,7 @@ int main()
 		{
 			if (isdraw)
 			{
-				if (game_check(m, HUMAN) || game_check(m, AI))
+				if (game_check(m))
 				{
 					done = true;
 					continue;

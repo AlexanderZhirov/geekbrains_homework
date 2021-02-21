@@ -202,32 +202,26 @@ void clear_map(map *m)
 	}
 }
 
-bool game_check(map *m, PLAYER p)
+bool game_check(map *m)
 {
-	if (checkWin(m, p))
-	{
-		char human[] = "Вы победили!";
-		char ai[] = "Вы проиграли!";
+	int answer = -1;
 
-		int answer = al_show_native_message_box(NULL, "Игра окончена!", (p == AI ? ai : human),
+	if (checkWin(m, HUMAN))
+		answer = al_show_native_message_box(NULL, "Игра окончена!", "Вы победили!",
 						"Начать игру сначала?", NULL, ALLEGRO_MESSAGEBOX_YES_NO);
 
-		if (answer == 1)
-			clear_map(m);
-		else
-			return true;
-	}
+	if (checkWin(m, AI))
+		answer = al_show_native_message_box(NULL, "Игра окончена!", "Вы проиграли!",
+						"Начать игру сначала?", NULL, ALLEGRO_MESSAGEBOX_YES_NO);
 
 	if (isDraw(m))
-	{
-		int answer = al_show_native_message_box(NULL, "Игра окончена!", "Ничья!",
+		answer = al_show_native_message_box(NULL, "Игра окончена!", "Ничья!",
 						"Начать игру сначала?", NULL, ALLEGRO_MESSAGEBOX_YES_NO);
 
-		if (answer == 1)
-			clear_map(m);
-		else
-			return true;
-	}
+	if (answer == 1)
+		clear_map(m);
+	else if (answer == 0 || answer == 2)
+		return true;
 
 	return false;
 }
