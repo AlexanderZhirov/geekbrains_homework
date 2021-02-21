@@ -46,6 +46,8 @@ void draw_map(const map *, ALLEGRO_BITMAP *, ALLEGRO_BITMAP *);
 void select_cell(map *, const int, const int);
 bool enter_cell(map *, const int, const int, PLAYER);
 bool game_check(map *);
-void clear_map(map *m);
+void clear_map(map *);
+void free_map(map *);
+bool exit_game();
 
 #endif

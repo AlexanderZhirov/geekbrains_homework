@@ -111,10 +111,6 @@ void draw_map(const map *m, ALLEGRO_BITMAP *bx, ALLEGRO_BITMAP *bo)
 				else
 					al_draw_scaled_bitmap(bo, 0, 0, swh, swh, c->sym_pos_x, c->sym_pos_y, m->sym_width, m->sym_width, 0);
 			}
-//				al_draw_filled_rectangle(c->pos_x, c->pos_y, c->pos_x + c->width, c->pos_y + c->width, al_map_rgb(255, 0, 255));
-//				al_draw_text(f, al_map_rgba_f(100, 100, 255, 0.9), 0 - c->sym_width / 2, 0 - c->sym_width / 2, 0, "x");
-//				al_draw_text(f, al_map_rgba_f(100, 100, 255, 0.9), (c->sym_pos_x + c->sym_width / 2) - (c->sym_width / 4), (c->sym_pos_y + c->sym_width / 2) - (c->sym_width / 4), 0, "X");
-
 
 			if (c->select)
 			{
@@ -123,9 +119,6 @@ void draw_map(const map *m, ALLEGRO_BITMAP *bx, ALLEGRO_BITMAP *bo)
 				else
 					al_draw_tinted_scaled_bitmap(bx, al_map_rgba_f(0, 255, 0, 0.3), 0, 0, swh, swh, c->sym_pos_x, c->sym_pos_y, m->sym_width, m->sym_width, 0);
 			}
-
-
-//				al_draw_filled_rectangle(c->pos_x, c->pos_y, c->pos_x + c->width, c->pos_y + c->width, al_map_rgb(0, 0, 255));
 		}
 	}
 
@@ -224,4 +217,40 @@ bool game_check(map *m)
 		return true;
 
 	return false;
+}
+
+void free_map(map *m)
+{
+	for (int i = 0; i < m->size; ++i)
+	{
+		for (int j = 0; j < m->size; ++j)
+		{
+			free(m->cells[i][j]);
+		}
+		free(m->cells[i]);
+	}
+	free(m->cells);
+
+	for (int i = 0; i < 2; ++i)
+	{
+		for (int j = 0; j < m->size - 1; ++j)
+		{
+			free(m->grid[i][j]);
+		}
+		free(m->grid[i]);
+	}
+	free(m->grid);
+
+	free(m);
+}
+
+bool exit_game()
+{
+	int answer = al_show_native_message_box(NULL, NULL, "Выход из игры",
+			"Вы хотите закончить игру?", NULL, ALLEGRO_MESSAGEBOX_YES_NO);
+
+	if (answer == 1)
+		return true;
+	else
+		return false;
 }

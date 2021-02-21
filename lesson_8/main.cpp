@@ -6,12 +6,44 @@
 
 #include "ai.hpp"
 #include "map.hpp"
+#include "parse_args.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
+	int countKeys = 3;
+
+	ra::key ks;  // size
+	ra::key kw;  // width/height window
+	ra::key km;  // margin map
+
+	ra::key *keys[countKeys] = {&ks, &kw, &km};
+
+	ra::parse_args(argc, argv, keys);
+
 	int size = 3;
 	int window_wh = 600;
 	int margin_map = 20;
+
+	if (ks.isset)
+	{
+		size = atoi(ks.arguments[0]);
+		if (size > 10 || size < 3)
+			size = 3;
+	}
+
+	if (kw.isset)
+	{
+		window_wh = atoi(kw.arguments[0]);
+		if (window_wh > 1000 || window_wh < 300)
+			window_wh = 600;
+	}
+
+	if (km.isset)
+	{
+		margin_map = atoi(km.arguments[0]);
+		if (margin_map > 100 || size < 20)
+			margin_map = 20;
+	}
 
 	map *m = init_map(size, window_wh, margin_map);
 
@@ -79,14 +111,22 @@ int main()
 			switch (ev.keyboard.keycode)
 			{
 				case ALLEGRO_KEY_ESCAPE:
-					done = true;
-					continue;
+					if (exit_game())
+					{
+						done = true;
+						continue;
+					}
+					al_flush_event_queue(event_queue);
 			}
 		}
 		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
-			done = true;
-			continue;
+			if (exit_game())
+			{
+				done = true;
+				continue;
+			}
+			al_flush_event_queue(event_queue);
 		}
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
 		{
@@ -107,6 +147,7 @@ int main()
 			{
 				if (game_check(m))
 				{
+					al_flush_event_queue(event_queue);
 					done = true;
 					continue;
 				}
@@ -136,7 +177,13 @@ int main()
 		}
 	}
 
+	free_map(m);
+
 	al_destroy_display(display);
+	al_destroy_bitmap(img_x);
+	al_destroy_bitmap(img_o);
+	al_destroy_timer(timer);
+	al_destroy_event_queue(event_queue);
 
 	return (0);
 }
