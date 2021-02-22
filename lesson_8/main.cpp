@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 	if (!al_init())
 	{
 		al_show_native_message_box(NULL, NULL, NULL,
-				"Ошибка при инициализации библиотеки allegro!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
+				"Не удается инициализировать allegro!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		return (-1);
 	}
 	
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 
 	if(!display)
 	{
-		al_show_native_message_box(NULL, NULL, NULL, "Ошибка при инициализации дисплея!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
+		al_show_native_message_box(NULL, NULL, "Ошибка!", "Не удается инициализировать дисплей!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		return (-1);
 	}
 
@@ -83,14 +83,28 @@ int main(int argc, char **argv)
 	al_init_image_addon();
 
 	img_x = al_load_bitmap("x.png");
+
+	if(!img_x)
+	{
+		al_show_native_message_box(display, NULL, "Ошибка!", "Не удается инициализировать \"x.png\"", NULL, ALLEGRO_MESSAGEBOX_ERROR);
+		return (-1);
+	}
+
 	img_o = al_load_bitmap("o.png");
+
+	if(!img_o)
+	{
+		al_show_native_message_box(display, NULL, "Ошибка!", "Не удается инициализировать \"o.png\"!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
+		return (-1);
+	}
+
 	timer = al_create_timer(1.0 / FPS);
 	event_queue = al_create_event_queue();
 
 	if(!event_queue)
 	{
-		al_show_native_message_box(NULL, NULL, NULL,
-				"Ошибка при инициализации события!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
+		al_show_native_message_box(display, NULL, "Ошибка!",
+				"Не удается инициализировать событие!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		return (-1);
 	}
 
@@ -111,7 +125,7 @@ int main(int argc, char **argv)
 			switch (ev.keyboard.keycode)
 			{
 				case ALLEGRO_KEY_ESCAPE:
-					if (exit_game())
+					if (exit_game(display))
 					{
 						done = true;
 						continue;
@@ -121,7 +135,7 @@ int main(int argc, char **argv)
 		}
 		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
-			if (exit_game())
+			if (exit_game(display))
 			{
 				done = true;
 				continue;
@@ -145,7 +159,7 @@ int main(int argc, char **argv)
 		{
 			if (isdraw)
 			{
-				if (game_check(m))
+				if (game_check(m, display))
 				{
 					al_flush_event_queue(event_queue);
 					done = true;

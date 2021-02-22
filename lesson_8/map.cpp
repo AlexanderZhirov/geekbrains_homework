@@ -195,20 +195,20 @@ void clear_map(map *m)
 	}
 }
 
-bool game_check(map *m)
+bool game_check(map *m, ALLEGRO_DISPLAY *d)
 {
 	int answer = -1;
 
 	if (checkWin(m, HUMAN))
-		answer = al_show_native_message_box(NULL, "Игра окончена!", "Вы победили!",
+		answer = al_show_native_message_box(d, "Игра окончена!", "Вы победили!",
 						"Начать игру сначала?", NULL, ALLEGRO_MESSAGEBOX_YES_NO);
 
 	if (checkWin(m, AI))
-		answer = al_show_native_message_box(NULL, "Игра окончена!", "Вы проиграли!",
+		answer = al_show_native_message_box(d, "Игра окончена!", "Вы проиграли!",
 						"Начать игру сначала?", NULL, ALLEGRO_MESSAGEBOX_YES_NO);
 
 	if (isDraw(m))
-		answer = al_show_native_message_box(NULL, "Игра окончена!", "Ничья!",
+		answer = al_show_native_message_box(d, "Игра окончена!", "Ничья!",
 						"Начать игру сначала?", NULL, ALLEGRO_MESSAGEBOX_YES_NO);
 
 	if (answer == 1)
@@ -244,9 +244,9 @@ void free_map(map *m)
 	free(m);
 }
 
-bool exit_game()
+bool exit_game(ALLEGRO_DISPLAY *d)
 {
-	int answer = al_show_native_message_box(NULL, NULL, "Выход из игры",
+	int answer = al_show_native_message_box(d, NULL, "Выход из игры",
 			"Вы хотите закончить игру?", NULL, ALLEGRO_MESSAGEBOX_YES_NO);
 
 	if (answer == 1)
